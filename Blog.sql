@@ -1,0 +1,85 @@
+create database   BlogifyDB
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */
+                                                   /*Table for User*/
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */
+create Table [User](
+UserId uniqueidentifier primary key DEFAULT NEWID(),
+UserName varchar(20) unique,
+Phone bigint,
+EmailAddress varchar(50),
+[Password] varchar(20),
+)
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */
+                                                /*Table For Blogs*/
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */
+create table Blog
+(
+BlogId uniqueidentifier primary key DEFAULT NEWID(),
+Title varchar(80),
+Content nvarchar(max),
+RegUserId uniqueidentifier foreign key references [User](UserId),
+ImageURL nvarchar(max)
+)
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */
+                                                /*Procedure to save user to DB*/
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */
+create proc sp_SaveUser
+@UserName varchar(20),
+@Phone bigint,
+@EmailAddress varchar(20),
+@Password varchar(20)
+as
+insert into [User]([UserName], [Phone], [EmailAddress], [Password]) values (@UserName,@Phone,@EmailAddress,@Password)
+
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */                  
+				                            /*Procedure for Auth*/
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */
+create proc sp_returnAuth
+as
+begin
+select UserName ,[Password],UserId from [User] 
+end
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */
+                                            /*Procedure to save blog in db*/
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */
+create proc sp_SaveBlog
+@Title varchar(20),
+@Content varchar(100),
+@ImageURL varchar(20),
+@RegUserName varchar(20)
+
+as
+begin
+declare @Id uniqueidentifier
+select @Id=[User].UserId from [User] where UserName=@RegUserName
+insert into Blog([Title],[Content], [ImageURL], [RegUserId]) values (@Title,@Content,@ImageURL,@RegUserName )
+end
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */
+                                      /*Procedure to Delete blog in db*/
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */
+create  procedure sp_DeleteBlog
+@BlogId uniqueidentifier
+as
+begin
+delete from Blog where Blog.BlogId=@BlogId
+end
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */
+
+                                    /*Procedure to Display All Blog*/
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */
+create proc sp_ShowBlog
+as
+begin
+select Blog.Title, Blog.Content, Blog.ImageUrl from Blog 
+end
+
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */
+
+                                    /*Procedure to Display Blog of Specific User */
+/* ////////////////////////////////////////////////////////////////////////////////////////////   */
+create proc sp_BlogByName
+@Username nvarchar(50)
+as
+begin
+select * from Blog where Blog.RegUserId=(select [User].UserId from [User] where UserName=@Username)
+end

@@ -1,0 +1,33 @@
+﻿@page "/addblog"
+@using ClassLibraryDAL;
+@using ClassLibraryModel;
+
+<h3>Add Blog</h3>
+<EditForm Model="blog" OnSubmit="SaveBlog" method="POST">
+    <label>Title</label>
+    <input type="text" placeholder="Give your blog a Title" @bind-value="blog.Title" required />
+    <label>Description</label>
+    <input type="text" @bind-value="blog.Content" required />
+    <label>Image</label>
+    <input type="file" @bind-value="blog.ImageURL" required />
+    <button type="submit">Submit</button>
+</EditForm>
+@msg
+@code {
+    private Blog blog { get; set; } = new Blog();
+    private string? msg {get;set;}
+    private User user { get; set; } = new User();
+    private string? uname { get; set; } //This username will be retreived from the registered user so fill that up and then reference it accordingly
+    private void SaveBlog()
+    {
+        int i = BlogDAL.SaveBlog(blog,uname);
+        if (i == 1)
+        {
+            msg = "Success...";
+        }
+        else
+        {
+            msg = "Error...";
+        }
+    }
+}
